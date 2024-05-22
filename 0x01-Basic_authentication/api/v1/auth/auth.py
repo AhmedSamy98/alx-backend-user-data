@@ -1,48 +1,44 @@
 #!/usr/bin/env python3
 """
-    This module will contain the auth class
+    Module: API Authentication
 """
 from flask import request
 from typing import List, TypeVar
+import re
 
 
 class Auth:
-    """ This is the authentication class
     """
-
-    def __init__(self) -> None:
-        pass
-
+        Manages API Authentication class
+    """
     def require_auth(self, path: str, excluded_paths: List[str]) -> bool:
         """
-
-        Args:
-            path (str): _description_
-            excluded_paths (List[str]): _description_
-
-        Returns:
-            bool: _description_
+            Method to check if auth is required
         """
-        if path and path[-1] != "/":
-            path = path + "/"
-        if path is None:
-            return True
-        if excluded_paths is None:
-            return True
-        if path in excluded_paths:
-            return False
+        if path is not None and excluded_paths is not None:
+            for exclusion_path in map(lambda x: x.strip(), excluded_paths):
+                pattern = ''
+                if exclusion_path[-1] == '*':
+                    pattern = '{}.*'.format(exclusion_path[0:-1])
+                elif exclusion_path[-1] == '/':
+                    pattern = '{}/*'.format(exclusion_path[0:-1])
+                else:
+                    pattern = '{}/*'.format(exclusion_path)
+                if re.match(pattern, path):
+                    return False
         return True
 
     def authorization_header(self, request=None) -> str:
         """
+            Method to get authorization header
         """
-        if request is None:
-            return None
-        if "Authorization" not in request.headers:
-            return None
-        return request.headers.get('Authorization', None)
+        if request is not None:
+            return request.headers.get('Authorization', None)
+        return None
 
     def current_user(self, request=None) -> TypeVar('User'):
         """
+            Method to get user from request
         """
         return None
+
